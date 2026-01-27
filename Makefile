@@ -13,3 +13,10 @@ cjso_test: test/cjson_test.c $(log) $(cjson)
 	@$(cc) $^ -o $@ -Ithirdparty
 	@./$@
 	@rm -rf $@
+
+
+mqtt := app/app_mqtt.c app/app_mqtt.h
+mqtt_test: test/mqtt_test.c $(log) $(cjson) $(mqtt)
+	@$(cc) $^ -o $@ -Ithirdparty -Iapp -lpaho-mqtt3c
+	@./$@
+	@rm -rf $@
