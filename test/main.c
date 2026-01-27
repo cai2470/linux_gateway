@@ -23,4 +23,9 @@ int main(int argc, char const *argv[])
         gcc main.o hello.o -o main
 
 
+Makefile:
+本质就是定义一系列的规则
+
+目标: 依赖
+    动作
 */
