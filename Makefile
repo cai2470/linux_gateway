@@ -39,3 +39,10 @@ thread_test_2: test/thread_test_2.c $(log)
 	@$(cc) $^ -o $@ -Ithirdparty -Iapp
 	@./$@
 	@rm -rf $@
+
+
+app_pool := app/app_pool.c app/app_pool.h
+app_pool_test: test/app_pool_test.c $(log) $(app_pool)
+	@$(cc) $^ -o $@ -Ithirdparty -Iapp
+	@./$@
+	@rm -rf $@
