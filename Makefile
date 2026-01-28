@@ -32,3 +32,10 @@ thread_test_1: test/thread_test_1.c $(log)
 	@$(cc) $^ -o $@ -Ithirdparty -Iapp
 	@./$@
 	@rm -rf $@
+
+
+
+thread_test_2: test/thread_test_2.c $(log) 
+	@$(cc) $^ -o $@ -Ithirdparty -Iapp
+	@./$@
+	@rm -rf $@
