@@ -1,11 +1,13 @@
 #ifndef __APP_COMMON_H
 #define __APP_COMMON_H
+#define _GNU_SOURCE  //: 放在最前面
 #include "log/log.h"
 #include "cjson/cJSON.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "unistd.h"
+
 
 typedef enum
 {
