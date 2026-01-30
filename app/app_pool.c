@@ -36,7 +36,7 @@ gate_state_t app_pool_init(int init_size)
     log_info("线程池需要的消息队列创建成功");
 
     // 2. 再去创建init_size多个线程
-    my_pool.pids = (pthread_t *)malloc(init_size * sizeof(pid_t));
+    my_pool.pids = (pthread_t *)malloc(init_size * sizeof(pthread_t));
     for (int i = 0; i < init_size; i++)
     {
         pthread_create(&my_pool.pids[i], NULL, thead_fun, NULL);

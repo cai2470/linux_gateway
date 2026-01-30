@@ -4,6 +4,7 @@
 #include "app_buffer.h"
 #include "app_pool.h"
 #include "app_mqtt.h"
+#include "app_msg.h"
 
 typedef struct {
     bool is_running;

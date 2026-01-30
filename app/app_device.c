@@ -24,7 +24,7 @@ gate_state_t app_device_init(void)
     log_info("线程池初始化成功 ");
 
     // 3. 初始化缓冲区
-   my_dev.download_buffer = app_buffer_init(1024);
+    my_dev.download_buffer = app_buffer_init(1024);
     if (my_dev.download_buffer == NULL)
     {
         log_error("下行缓冲区初始化失败 ");
@@ -32,6 +32,7 @@ gate_state_t app_device_init(void)
         app_pool_deinit(); // 去实现
         // 反初始化mqtt
         app_mqtt_deinit();
+
         return GATE_ERROR;
     }
     log_info("下行缓冲区初始化成功 ");
@@ -50,9 +51,9 @@ gate_state_t app_device_init(void)
     log_info("上行缓冲区初始化成功 ");
 
     // 4. 初始化modbus模块
+
+    return GATE_OK;
 }
-
-
 
 void mqtt_recv_cb(char *data, int len);
 void upload_task(void *);
@@ -75,7 +76,7 @@ void app_device_start(void)
 
 void mqtt_recv_cb(char *data, int len)
 {
-    log_info("收到mqtt数据 %.*s", len, data);
+    // log_info("收到mqtt数据 %.*s", len, data);
 
     app_buffer_write(my_dev.download_buffer, data, len);
 }
@@ -110,6 +111,60 @@ void modbus_task(void *args)
         }
 
         // 打印读到的数据
-        log_info("modubs读写线程: %.*s", real_len, data);
+        // log_info("modubs读写线程: %.*s", real_len, data);
+        app_msg_t msg;
+        app_msg_json_2_msg(data, &msg);
+
+        if (strcmp(msg.connType, "rs485") == 0)
+        {
+            if (strcmp(msg.action, "set") == 0)
+            {
+
+                // 直接调用modubs写函数 TODO
+
+                // 测试只打印msg的内容
+                log_info("modubs写: %s %d %d", msg.connType, msg.motorId, msg.motorSpeed);
+            }
+            else if (strcmp(msg.action, "get") == 0)
+            {
+                log_info("modubs读: %s %d", msg.connType, msg.motorId);
+
+                // 等待响应结果
+                msg.motorSpeed = 300;
+                msg.status = "ok";
+                app_msg_msg_2_json(&msg, data);
+                app_buffer_write(my_dev.upload_buffer, data, strlen(data));
+            }
+        }
+        else if (strcmp(msg.connType, "lora") == 0)
+        {
+            ///
+        }
     }
 }
+
+/*
+设置电机速度:
+    {
+        "connType": "rs485",
+        "motorId": 8,
+        "action": "set",
+        "motorSpeed": 100
+    }
+
+获取电机速度:
+    {
+        "connType": "rs485",
+        "motorId": 8,
+        "action": "get"
+    }
+
+返回电机速度:
+    {
+        "connType": "rs485",
+        "motorId": 8,
+        "action": "set",
+        "motorSpeed": 100,
+        "status": ok // error
+    }
+*/

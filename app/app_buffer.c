@@ -24,22 +24,22 @@ typedef struct
 
 static app_sub_buffer_t *app_sub_buffer_init(int capacity)
 {
-    log_info("00");
+
     app_sub_buffer_t *sub_buffer = (app_sub_buffer_t *)malloc(sizeof(app_sub_buffer_t));
-    log_info("11");
+
     if (sub_buffer == NULL)
     {
         log_error("子缓冲区初始化失败");
         return NULL;
     }
-    log_info("22");
+ 
     sub_buffer->ptr = (char *)malloc(capacity);
     if (sub_buffer->ptr == NULL)
     {
         log_error("子缓冲区初始化失败");
         return NULL;
     }
-    log_info("33");
+
     memset(sub_buffer->ptr, 0, capacity);
 
     sub_buffer->capacity = capacity;
@@ -59,14 +59,14 @@ app_buffer_handle app_buffer_init(int capacity)
     }
 
     buffer->sub_buffer[0] = app_sub_buffer_init(capacity);
-    log_info("1");
+
     if (buffer->sub_buffer[0] == NULL)
     {
         return NULL;
     }
-    log_info("2");
+
     buffer->sub_buffer[1] = app_sub_buffer_init(capacity);
-    log_info("3");
+
     if (buffer->sub_buffer[1] == NULL)
     {
         return NULL;
@@ -119,7 +119,7 @@ gate_state_t app_buffer_write(app_buffer_handle handle, char *data, uint8_t len)
 
     // 释放写锁
     pthread_mutex_unlock(&buffer->write_mutex);
-    log_debug("缓冲区写入成功: %s", data);
+//    log_debug("缓冲区写入成功: %s", data);
     return GATE_OK;
 }
 
@@ -135,7 +135,7 @@ gate_state_t app_buffer_read(app_buffer_handle handle,
     if (r_buffer->len == 0)
     {
         // 缓冲区为空
-        log_info("交换缓冲区");
+        //log_info("交换缓冲区");
         // 交换缓冲区: 交换索引
         // 先获取写锁
         pthread_mutex_lock(&buffer->write_mutex);
@@ -147,7 +147,7 @@ gate_state_t app_buffer_read(app_buffer_handle handle,
         r_buffer = buffer->sub_buffer[buffer->read_index];
         if (r_buffer->len == 0)
         {
-            log_error("缓冲区为空");
+            //log_error("缓冲区为空");
             pthread_mutex_unlock(&buffer->read_mutex);
             return GATE_ERROR;
         }
