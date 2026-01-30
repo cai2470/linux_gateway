@@ -8,6 +8,7 @@ typedef struct
 
 typedef struct
 {
+    int size;
     pthread_t *pids;
     mqd_t mq_id;
     char *mq_name;
@@ -18,6 +19,7 @@ static app_pool_t my_pool;
 void *thead_fun(void *);
 gate_state_t app_pool_init(int init_size)
 {
+    my_pool.size = init_size;
     my_pool.mq_name = "/my_pool";
     // 1. 先创建一个消息队列
     struct mq_attr attr;
@@ -39,6 +41,25 @@ gate_state_t app_pool_init(int init_size)
     {
         pthread_create(&my_pool.pids[i], NULL, thead_fun, NULL);
     }
+    return GATE_OK;
+}
+
+void app_pool_deinit(void)
+{
+    // 关闭线程
+    for (int i = 0; i < my_pool.size; i++)
+    {
+        // pthread_cancel() 在线程外部取消其他线程
+        //  pthread_exit()  在线程内部退出当前线程
+        pthread_cancel(my_pool.pids[i]);
+    }
+
+    // 释放保存线程id的内存
+    free(my_pool.pids);
+
+    // 关闭和释放消息队列
+    mq_close(my_pool.mq_id);
+    mq_unlink(my_pool.mq_name);
 }
 
 void *thead_fun(void *args)

@@ -53,3 +53,9 @@ app_buffer_test: test/app_buffer_test.c $(log) $(app_buffer)
 	@./$@
 	@rm -rf $@
 
+
+app_device := app/app_device.c app/app_device.h
+main: main.c $(log) $(app_buffer) $(app_pool) $(app_device) $(mqtt)
+	@$(cc) $^ -o $@ -Ithirdparty -Iapp  -lpaho-mqtt3c
+	@./$@
+	@rm -rf $@

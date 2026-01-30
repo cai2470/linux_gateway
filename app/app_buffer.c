@@ -24,24 +24,28 @@ typedef struct
 
 static app_sub_buffer_t *app_sub_buffer_init(int capacity)
 {
+    log_info("00");
     app_sub_buffer_t *sub_buffer = (app_sub_buffer_t *)malloc(sizeof(app_sub_buffer_t));
+    log_info("11");
     if (sub_buffer == NULL)
     {
         log_error("子缓冲区初始化失败");
         return NULL;
     }
+    log_info("22");
     sub_buffer->ptr = (char *)malloc(capacity);
     if (sub_buffer->ptr == NULL)
     {
         log_error("子缓冲区初始化失败");
         return NULL;
     }
+    log_info("33");
     memset(sub_buffer->ptr, 0, capacity);
 
     sub_buffer->capacity = capacity;
     sub_buffer->len = 0;
 
-    log_debug("子缓冲区初始化成功");
+    log_info("子缓冲区初始化成功");
     return sub_buffer;
 }
 
@@ -55,11 +59,14 @@ app_buffer_handle app_buffer_init(int capacity)
     }
 
     buffer->sub_buffer[0] = app_sub_buffer_init(capacity);
+    log_info("1");
     if (buffer->sub_buffer[0] == NULL)
     {
         return NULL;
     }
+    log_info("2");
     buffer->sub_buffer[1] = app_sub_buffer_init(capacity);
+    log_info("3");
     if (buffer->sub_buffer[1] == NULL)
     {
         return NULL;
@@ -72,6 +79,18 @@ app_buffer_handle app_buffer_init(int capacity)
     pthread_mutex_init(&buffer->write_mutex, NULL);
 
     return (app_buffer_handle)buffer;
+}
+
+void app_buffer_deinit(app_buffer_handle handle)
+{
+    app_buffer_t *buffer = (app_buffer_t *)handle;
+    free(buffer->sub_buffer[0]->ptr);
+    free(buffer->sub_buffer[0]);
+
+    free(buffer->sub_buffer[1]->ptr);
+    free(buffer->sub_buffer[1]);
+
+    free(buffer);
 }
 
 gate_state_t app_buffer_write(app_buffer_handle handle, char *data, uint8_t len) // abcd =>> 1abcd
