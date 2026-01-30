@@ -46,3 +46,10 @@ app_pool_test: test/app_pool_test.c $(log) $(app_pool)
 	@$(cc) $^ -o $@ -Ithirdparty -Iapp
 	@./$@
 	@rm -rf $@
+
+app_buffer := app/app_buffer.c app/app_buffer.h
+app_buffer_test: test/app_buffer_test.c $(log) $(app_buffer)
+	@$(cc) $^ -o $@ -Ithirdparty -Iapp
+	@./$@
+	@rm -rf $@
+
