@@ -1,62 +1,65 @@
-cc := gcc
+CC:=$(CROSS_COMPILE)gcc
 
-log := thirdparty/log/log.c thirdparty/log/log.h
-cjson := thirdparty/cjson/cJSON.c thirdparty/cjson/cJSON.h
+BOARD_DIR := $(shell pwd)/
+#改为自己开发板的ip地址
+PEER := root@192.168.54.42
 
-log_test: test/log_test.c $(log)
-	@$(cc) $^ -o $@ -Ithirdparty
-	@./$@
-	@rm -rf $@
+#CFLAGS += -Wall -Wextra
 
+CFLAGS += -I.
+CFLAGS += -Ithirdparty
+CFLAGS += -Iapp
+CFLAGS += -Idaemon
+CFLAGS += -Iota
 
-cjso_test: test/cjson_test.c $(log) $(cjson)
-	@$(cc) $^ -o $@ -Ithirdparty
-	@./$@
-	@rm -rf $@
+ifdef SYSROOT
+	CFLAGS += --sysroot=$(SYSROOT)
+endif
 
+LDLIBS += -lpaho-mqtt3c
+#LDLIBS += -lcurl
+#LDLIBS += -lcrypto
+LDLIBS += -lmodbus
+#modbus文件路径,toolchain前面的路径需要改为自己的工程路径
+#LDLIBS += -L/home/shtos/桌面/01_Projects/485_gateway/toolchain/arm-linux-gnueabihf/lib
 
-mqtt := app/app_mqtt.c app/app_mqtt.h
-mqtt_test: test/mqtt_test.c $(log) $(cjson) $(mqtt)
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp -lpaho-mqtt3c
-	@./$@
-	@rm -rf $@
+SRC += $(shell find app -name "*.c" -type f)
+SRC += $(shell find daemon -name "*.c"  -type f)
+SRC += $(shell find ota -name "*.c" -type f)
+SRC += $(shell find thirdparty -name "*.c"  -type f)
 
+OBJ := $(SRC:.c=.o)
 
-thread_test: test/thread_test.c $(log) 
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp
-	@./$@
-	@rm -rf $@
+TARGET := gateway
 
+.PHONY: all, clean
 
-thread_test_1: test/thread_test_1.c $(log) 
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp
-	@./$@
-	@rm -rf $@
+all: $(TARGET)
 
+clean:
+	@-rm -f $(TARGET) $(OBJ) main.o
+$(TARGET): main.o $(OBJ)
+	@-$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
+cross-compile:
+	@CROSS_COMPILE=$(BOARD_DIR)/toolchain/bin/arm-linux-gnueabihf- \
+	 SYSROOT=$(BOARD_DIR)/sysroot \
+	 make -j16
+	@scp -O $(TARGET) $(PEER):/usr/bin/$(TARGET)
 
-thread_test_2: test/thread_test_2.c $(log) 
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp
-	@./$@
-	@rm -rf $@
+cross-init:
+	@scp -O init/S99gateway $(PEER):/etc/init.d/S99gateway
 
+%.o: %.c
+	@-$(CC) $(CFLAGS) -c $^ -o $@
 
-app_pool := app/app_pool.c app/app_pool.h
-app_pool_test: test/app_pool_test.c $(log) $(app_pool)
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp
-	@./$@
-	@rm -rf $@
+%_test: test/%_test.o $(OBJ)
+	@-$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
+	@-./$@
+	@-rm $@ $^
 
-app_buffer := app/app_buffer.c app/app_buffer.h
-app_buffer_test: test/app_buffer_test.c $(log) $(app_buffer)
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp
-	@./$@
-	@rm -rf $@
+#./表示让系统在当前目录(GATEWAY_SHT)下查找这个程序
+# $^表示所有依赖文件，即所有的.o文件
+# $@表示目标(target)文件，即可执行文件
+# -I表示在编译时添加头文件搜索路径
 
-
-app_device := app/app_device.c app/app_device.h
-app_msg := app/app_msg.c app/app_msg.h
-main: main.c $(log) $(app_buffer) $(app_pool) $(app_device) $(mqtt) $(app_msg) $(cjson)
-	@$(cc) $^ -o $@ -Ithirdparty -Iapp  -lpaho-mqtt3c
-	@./$@
-	@rm -rf $@

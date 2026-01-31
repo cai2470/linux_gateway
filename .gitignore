@@ -1,4 +1,7 @@
 *.o
 *.s
 *.i
-.vscode
+.vscode/
+output/
+toolchain/
+sysroot/

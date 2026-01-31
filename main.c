@@ -20,3 +20,15 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+
+/*
+
+            cpu     操作系统
+编译        x86     linux
+运行        arm     linux
+
+有任何一个不一致, 就需要使用交叉编译
+
+
+*/
