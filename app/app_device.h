@@ -16,6 +16,7 @@ typedef struct {
 extern app_device_t my_dev;
 
 gate_state_t app_device_init(void);
+void app_device_deinit(void);
 void app_device_start(void);
 
 #endif 

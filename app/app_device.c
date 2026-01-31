@@ -62,6 +62,15 @@ gate_state_t app_device_init(void)
     return GATE_OK;
 }
 
+void app_device_deinit(void)
+{
+    app_mqtt_deinit();
+    app_modbus_deinit();
+    app_pool_deinit();
+    app_buffer_deinit(my_dev.download_buffer);
+    app_buffer_deinit(my_dev.upload_buffer);
+}
+
 void mqtt_recv_cb(char *data, int len);
 void upload_task(void *);
 void modbus_task(void *);

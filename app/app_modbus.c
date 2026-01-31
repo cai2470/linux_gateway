@@ -25,6 +25,12 @@ gate_state_t app_modbus_init(void)
     return GATE_OK;
 }
 
+void app_modbus_deinit(void)
+{
+    modbus_close(rtx);
+    modbus_free(rtx);
+}
+
 /*
 设置电机速度:
     向保持寄存器写入电机的速度
