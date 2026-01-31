@@ -51,7 +51,14 @@ gate_state_t app_device_init(void)
     log_info("上行缓冲区初始化成功 ");
 
     // 4. 初始化modbus模块
+    err = app_modbus_init();
+    if (err != GATE_OK)
+    {
+        log_error("modbus模块初始化失败 ");
+    }
+    log_info("modbus模块初始化成功 ");
 
+    log_info("app_device 模块初始化成功 ");
     return GATE_OK;
 }
 
@@ -121,17 +128,23 @@ void modbus_task(void *args)
             {
 
                 // 直接调用modubs写函数 TODO
+                app_modbus_write_single_hold_register(msg.motorId, msg.motorSpeed);
 
                 // 测试只打印msg的内容
-                log_info("modubs写: %s %d %d", msg.connType, msg.motorId, msg.motorSpeed);
+                // log_info("modubs写: %s %d %d", msg.connType, msg.motorId, msg.motorSpeed);
             }
             else if (strcmp(msg.action, "get") == 0)
             {
-                log_info("modubs读: %s %d", msg.connType, msg.motorId);
-
-                // 等待响应结果
-                msg.motorSpeed = 300;
-                msg.status = "ok";
+                // log_info("modubs读: %s %d", msg.connType, msg.motorId);
+                gate_state_t err = app_modbus_read_single_input_register(msg.motorId, &msg.motorSpeed);
+                if (err == GATE_OK)
+                {
+                    msg.status = "ok";
+                }
+                else
+                {
+                    msg.status = "error";
+                }
                 app_msg_msg_2_json(&msg, data);
                 app_buffer_write(my_dev.upload_buffer, data, strlen(data));
             }
