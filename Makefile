@@ -2,7 +2,7 @@ CC:=$(CROSS_COMPILE)gcc
 
 BOARD_DIR := $(shell pwd)/
 #改为自己开发板的ip地址
-PEER := root@192.168.54.42
+PEER := root@192.168.54.51
 
 #CFLAGS += -Wall -Wextra
 
@@ -17,8 +17,8 @@ ifdef SYSROOT
 endif
 
 LDLIBS += -lpaho-mqtt3c
-#LDLIBS += -lcurl
-#LDLIBS += -lcrypto
+LDLIBS += -lcurl
+LDLIBS += -lcrypto
 LDLIBS += -lmodbus
 #modbus文件路径,toolchain前面的路径需要改为自己的工程路径
 #LDLIBS += -L/home/shtos/桌面/01_Projects/485_gateway/toolchain/arm-linux-gnueabihf/lib

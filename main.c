@@ -1,4 +1,5 @@
 #include "app_runner.h"
+#include "ota.h"
 
 int main(int argc, char const *argv[])
 {
@@ -13,13 +14,15 @@ int main(int argc, char const *argv[])
     }
     else if (strcmp(argv[1], "ota") == 0)
     {
-        log_info("ota");
+        // log_info("ota");
+        ota_version_check();
     }
     else if (strcmp(argv[1], "daemon") == 0)
     {
         log_info("daemon");
     }
-    else{
+    else
+    {
         log_info("参数错误: app | ota | daemon 必须是其中一个");
     }
     return 0;
@@ -32,6 +35,19 @@ int main(int argc, char const *argv[])
 运行        arm     linux
 
 有任何一个不一致, 就需要使用交叉编译
+
+---------------------------------------------
+ota的流程:
+
+1. 判断版本, 是否需要升级
+    从服务读取最新的版本信息: 提供一个纯文本文件
+
+2. 如果需要升级: 下载新的应用
+    从服务下载新的应用, 二进程文件
+
+3. 做校验: 做hash校验
+
+4. 停止当前应用, 启用新的应用
 
 
 */
