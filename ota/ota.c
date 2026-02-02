@@ -2,6 +2,8 @@
 
 #define OTA_VERSION_URL "http://192.168.54.188:8000/update/version_info.json"
 #define CURR_INFO "{\"major\":1,\"minor\":0,\"patch\":0}"
+#define OTA_BIN_URL "http://192.168.54.188:8000/update/gateway"
+#define OTA_BIN_FILE "/usr/bin/gateway.update"
 
 typedef struct
 {
@@ -25,6 +27,53 @@ void parse_version_info(char *json_str, ota_info_t *info)
         info->sha1 = strdup(sha1);
     }
     cJSON_Delete(root);
+}
+
+static char *get_file_sha(char *filepath)
+{
+    FILE *file = fopen(filepath, "rb");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return NULL;
+    }
+
+    unsigned char hash[SHA_DIGEST_LENGTH];
+    SHA_CTX sha1;
+    SHA1_Init(&sha1);
+
+    const int bufSize = 32768;
+    unsigned char *buffer = (unsigned char *)malloc(bufSize);
+    if (!buffer)
+    {
+        perror("Failed to allocate memory");
+        fclose(file);
+        return NULL;
+    }
+
+    int bytesRead;
+    while ((bytesRead = fread(buffer, 1, bufSize, file)) > 0)
+    {
+        SHA1_Update(&sha1, buffer, bytesRead);
+    }
+
+    SHA1_Final(hash, &sha1);
+    fclose(file);
+    free(buffer);
+
+    char *outputBuffer = (char *)malloc(SHA_DIGEST_LENGTH * 2 + 1);
+    if (!outputBuffer)
+    {
+        perror("Failed to allocate memory");
+        return NULL;
+    }
+
+    for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
+    {
+        sprintf(outputBuffer + (i * 2), "%02x", hash[i]);
+    }
+
+    return outputBuffer;
 }
 
 void ota_version_check(void)
@@ -53,4 +102,37 @@ void ota_version_check(void)
 
     log_info("可以升级");
     // 3. 下载
+    gate_state_t err = ota_http_download(OTA_BIN_URL, OTA_BIN_FILE);
+    if (err != GATE_OK)
+    {
+        log_error("下载失败");
+        return;
+    }
+    log_info("下载成功");
+    // 4. 做hash校验
+    if (strcmp(get_file_sha(OTA_BIN_FILE), new_info.sha1) != 0)
+    {
+        log_error("hash校验失败");
+        return;
+    }
+    log_info("hash校验成功");
+    log_info("ota升级成功");
+    return;
+}
+
+void ota_auto_update(void)
+{
+    ota_version_check();
+    while (1)
+    {
+        // 从1970-01-01 0:0:0 开始的s
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        if (t->tm_hour == 10 && t->tm_min == 34)
+        {
+            ota_version_check();
+        }
+        log_info("ota升级检测....");
+        sleep(60);
+    }
 }

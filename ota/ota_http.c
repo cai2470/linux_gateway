@@ -46,3 +46,37 @@ char *ota_http_get_text(char *url)
     curl_easy_cleanup(curl);
     return text;
 }
+
+gate_state_t ota_http_download(char *url, char *file_name)
+{
+    CURL *curl;
+    curl = curl_easy_init();
+    if (curl == NULL)
+    {
+        log_error("curl_easy_init() failed");
+        return GATE_ERROR;
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+    FILE *fp = fopen(file_name, "wb");
+    if (fp == NULL)
+    {
+        log_error("fopen() failed");
+        curl_easy_cleanup(curl);
+        return GATE_ERROR;
+    }
+
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+    CURLcode result = curl_easy_perform(curl);
+    if (result != CURLE_OK)
+    {
+        log_error("curl_easy_perform() failed: %s", curl_easy_strerror(result));
+        curl_easy_cleanup(curl);
+        return GATE_ERROR;
+    }
+    curl_easy_cleanup(curl);
+    fclose(fp);  // 关闭文件
+    return GATE_OK;
+}

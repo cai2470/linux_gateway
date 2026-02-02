@@ -15,8 +15,10 @@ int main(int argc, char const *argv[])
     else if (strcmp(argv[1], "ota") == 0)
     {
         // log_info("ota");
-        ota_version_check();
+        //ota_version_check();
+        ota_auto_update();
     }
+
     else if (strcmp(argv[1], "daemon") == 0)
     {
         log_info("daemon");
