@@ -1,8 +1,5 @@
 *.o
-*.s
-*.i
+gateway
 .vscode/
-output/
-toolchain/
-sysroot/
-update/
+build/
+*.swp

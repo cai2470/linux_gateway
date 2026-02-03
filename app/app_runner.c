@@ -19,7 +19,7 @@ void app_runner_run(void)
     if (state != GATE_OK)
     {
         log_info("设备初始化失败");
-        return -1;
+        return;
     }
     // 2. 启动设备
     app_device_start();

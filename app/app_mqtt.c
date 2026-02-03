@@ -1,6 +1,6 @@
 #include "app_mqtt.h"
 
-#define MQTT_SERVER_URL "tcp://192.168.54.228:1883"
+#define MQTT_SERVER_URL "tcp://192.168.54.24:1883"
 #define CLIENTID "my_client"
 
 #define PULL_TOPIC "pull"
@@ -53,6 +53,7 @@ gate_state_t app_mqtt_init(void)
         return GATE_ERROR;
     }
     log_info("MQTTClient_subscribe success");
+    return GATE_OK;
 }
 
 
@@ -96,7 +97,7 @@ void conn_lost(void *context, char *cause)
 }
 int msg_recv(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
-    // log_info("MQTT message received: %.*s", message->payloadlen, message->payload);
+    log_info("MQTT message received: %.*s", message->payloadlen, (char *)message->payload);
     if (my_mqtt.recv_cb)
     {
         my_mqtt.recv_cb(message->payload, message->payloadlen);

@@ -60,7 +60,7 @@ gate_state_t ota_http_download(char *url, char *file_name)
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-    FILE *fp = fopen(file_name, "wb");
+    FILE *fp = fopen(file_name, "wb");   // 以二进制写方式打开文件
     if (fp == NULL)
     {
         log_error("fopen() failed");

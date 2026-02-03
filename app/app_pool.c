@@ -68,7 +68,7 @@ void *thead_fun(void *args)
     {
         // 1. 从消息队列获取消息   1. void fun(void *)  2. 函数的参数
         task_t task;
-        ssize_t real_size = mq_receive(my_pool.mq_id, &task, sizeof(task_t), NULL);
+        ssize_t real_size = mq_receive(my_pool.mq_id, (char *)&task, sizeof(task_t), NULL);
         if (real_size > 0 && task.task)
         {
             task.task(task.args);

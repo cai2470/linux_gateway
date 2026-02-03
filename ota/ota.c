@@ -13,7 +13,8 @@ typedef struct
     char *sha1;
 } ota_info_t;
 
-void parse_version_info(char *json_str, ota_info_t *info)
+// 解析版本信息的json字符串
+void parse_version_info(char *json_str, ota_info_t *info)   
 {
     cJSON *root = cJSON_Parse(json_str);
     info->major = cJSON_GetObjectItem(root, "major")->valueint;
@@ -29,6 +30,7 @@ void parse_version_info(char *json_str, ota_info_t *info)
     cJSON_Delete(root);
 }
 
+// 本地指纹计算器
 static char *get_file_sha(char *filepath)
 {
     FILE *file = fopen(filepath, "rb");
